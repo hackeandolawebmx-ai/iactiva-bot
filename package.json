@@ -1,0 +1,31 @@
+{
+  "name": "iactiva-bot",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Bot de WhatsApp que califica prospectos de iActiva (bot.iactiva.mx)",
+  "scripts": {
+    "dev": "tsx watch --env-file-if-exists=.env src/server.ts",
+    "dev:tunel": "tsx --env-file-if-exists=.env scripts/dev-tunel.ts",
+    "lab": "tsx --env-file-if-exists=.env src/lab/chat.ts",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^1.4.0",
+    "@hono/node-server": "^2.1.6",
+    "@supabase/supabase-js": "^2.118.0",
+    "@vercel/functions": "^3.10.6",
+    "hono": "^4.13.16",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vitest": "^5.1.0"
+  }
+}
