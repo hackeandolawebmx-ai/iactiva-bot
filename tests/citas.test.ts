@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { MemoryStore } from "../src/db/memory";
-import { getModulo, type ToolContext } from "../src/modules";
-import { validarFicha } from "../src/tenants/load";
-import { aUtc } from "../src/core/tiempo";
-import { fichaDePrueba } from "./helpers";
+import { MemoryStore } from "../src/db/memory.js";
+import { getModulo, type ToolContext } from "../src/modules/index.js";
+import { validarFicha } from "../src/tenants/load.js";
+import { aUtc } from "../src/core/tiempo.js";
+import { fichaDePrueba } from "./helpers.js";
 
 const tenant = fichaDePrueba();
 const config = tenant.modulos.find((m) => m.nombre === "citas")!.config;

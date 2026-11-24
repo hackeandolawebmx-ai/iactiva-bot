@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import type { Cita, Contacto, Conversacion, Mensaje, NuevaCita, NuevoMensaje, Store } from "./store";
+import type { Cita, Contacto, Conversacion, Mensaje, NuevaCita, NuevoMensaje, Store } from "./store.js";
 
 export class MemoryStore implements Store {
   private vistos = new Set<string>();

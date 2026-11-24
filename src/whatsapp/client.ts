@@ -1,4 +1,4 @@
-import type { Canal } from "../core/pipeline";
+import type { Canal } from "../core/pipeline.js";
 
 async function graph(path: string, body: unknown, token: string): Promise<void> {
   const version = process.env.META_GRAPH_VERSION || "v23.0";

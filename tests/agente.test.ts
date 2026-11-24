@@ -1,10 +1,10 @@
 import type Anthropic from "@anthropic-ai/sdk";
 import { describe, expect, it } from "vitest";
-import { MemoryStore } from "../src/db/memory";
-import { procesarEntrante, type Canal, type Entrante } from "../src/core/pipeline";
-import type { Llm } from "../src/agent/run";
-import { aUtc } from "../src/core/tiempo";
-import { fichaDePrueba } from "./helpers";
+import { MemoryStore } from "../src/db/memory.js";
+import { procesarEntrante, type Canal, type Entrante } from "../src/core/pipeline.js";
+import type { Llm } from "../src/agent/run.js";
+import { aUtc } from "../src/core/tiempo.js";
+import { fichaDePrueba } from "./helpers.js";
 
 const RESPONSABLE = "5215599990000";
 const CLIENTE = "5215511112222";

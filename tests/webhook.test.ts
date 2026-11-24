@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { crearApp } from "../src/app";
-import { MemoryStore } from "../src/db/memory";
-import { firmar } from "../src/webhook/signature";
-import { canalGrabador, fichaDePrueba, llmFalso, payloadTexto } from "./helpers";
+import { crearApp } from "../src/app.js";
+import { MemoryStore } from "../src/db/memory.js";
+import { firmar } from "../src/webhook/signature.js";
+import { canalGrabador, fichaDePrueba, llmFalso, payloadTexto } from "./helpers.js";
 
 const SECRET = "s3cret";
 

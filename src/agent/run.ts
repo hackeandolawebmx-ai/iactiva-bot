@@ -1,8 +1,8 @@
 import Anthropic from "@anthropic-ai/sdk";
-import type { Tenant } from "../tenants/schema";
-import type { Contacto, Store, Mensaje } from "../db/store";
-import { getModulo, type ToolDef } from "../modules";
-import { promptEstable, promptVariable } from "./prompt";
+import type { Tenant } from "../tenants/schema.js";
+import type { Contacto, Store, Mensaje } from "../db/store.js";
+import { getModulo, type ToolDef } from "../modules/index.js";
+import { promptEstable, promptVariable } from "./prompt.js";
 
 /** Funcion que llama al modelo. Se inyecta para poder probar sin red. */
 export type Llm = (p: Anthropic.MessageCreateParamsNonStreaming) => Promise<Anthropic.Message>;

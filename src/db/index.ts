@@ -1,6 +1,6 @@
-import { MemoryStore } from "./memory";
-import { SupabaseStore } from "./supabase";
-import type { Store } from "./store";
+import { MemoryStore } from "./memory.js";
+import { SupabaseStore } from "./supabase.js";
+import type { Store } from "./store.js";
 
 /** Supabase si hay credenciales en el entorno; si no, memoria (se pierde al reiniciar). */
 export function crearStore(): Store {
@@ -9,4 +9,4 @@ export function crearStore(): Store {
   return new MemoryStore();
 }
 
-export type { Store } from "./store";
+export type { Store } from "./store.js";

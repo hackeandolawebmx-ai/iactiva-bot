@@ -1,5 +1,5 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
-import type { Cita, Contacto, Conversacion, Mensaje, NuevaCita, NuevoMensaje, Store } from "./store";
+import type { Cita, Contacto, Conversacion, Mensaje, NuevaCita, NuevoMensaje, Store } from "./store.js";
 
 const UNICO = "23505"; // unique_violation
 const EMPALME = "23P01"; // exclusion_violation (citas_sin_empalme)

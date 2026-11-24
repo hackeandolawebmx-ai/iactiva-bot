@@ -1,4 +1,4 @@
-import type { Entrante } from "../core/pipeline";
+import type { Entrante } from "../core/pipeline.js";
 
 export interface EventoParseado {
   phone_number_id: string;

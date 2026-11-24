@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { firmaValida, firmar } from "../src/webhook/signature";
+import { firmaValida, firmar } from "../src/webhook/signature.js";
 
 const SECRET = "secreto-de-prueba";
 const CUERPO = JSON.stringify({ hola: "mundo", acentos: "áéí" });

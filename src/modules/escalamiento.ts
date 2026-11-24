@@ -1,4 +1,4 @@
-import type { Module, ToolDef } from "./types";
+import type { Module, ToolDef } from "./types.js";
 
 const tools: ToolDef[] = [
   {

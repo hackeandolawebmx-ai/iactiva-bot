@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { cargarFicha } from "../src/tenants/load";
+import { cargarFicha } from "../src/tenants/load.js";
 
 describe("ficha de iactiva", () => {
   it("es valida y no ofrece precios ni citas", () => {

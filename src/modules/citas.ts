@@ -1,7 +1,7 @@
 import { z } from "zod";
-import type { Module, ToolContext, ToolDef } from "./types";
-import type { Cita } from "../db/store";
-import { aMinutos, aUtc, deMinutos, diaDeLaSemana, fechaValida, legible } from "../core/tiempo";
+import type { Module, ToolContext, ToolDef } from "./types.js";
+import type { Cita } from "../db/store.js";
+import { aMinutos, aUtc, deMinutos, diaDeLaSemana, fechaValida, legible } from "../core/tiempo.js";
 
 const hhmm = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, "hora en formato HH:mm");
 

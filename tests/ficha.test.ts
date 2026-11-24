@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { validarFicha } from "../src/tenants/load";
+import { validarFicha } from "../src/tenants/load.js";
 
 const plantilla = () =>
   JSON.parse(readFileSync(join(process.cwd(), "tests", "fixtures", "consultorio.json"), "utf8"));

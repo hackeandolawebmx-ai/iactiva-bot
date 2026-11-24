@@ -1,5 +1,5 @@
-import type { Tenant } from "../tenants/schema";
-import { getModulo } from "../modules";
+import type { Tenant } from "../tenants/schema.js";
+import { getModulo } from "../modules/index.js";
 
 /** Parte estable del prompt (se cachea). Solo depende de la ficha. */
 export function promptEstable(t: Tenant): string {

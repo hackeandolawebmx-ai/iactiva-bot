@@ -1,4 +1,4 @@
-import type { Module } from "./types";
+import type { Module } from "./types.js";
 
 export const faq: Module = {
   nombre: "faq",

@@ -1,10 +1,10 @@
 import { Hono } from "hono";
-import type { Tenant } from "./tenants/schema";
-import type { Store } from "./db/store";
-import type { Llm } from "./agent/run";
-import { procesarEntrante, Limitador, type Canal } from "./core/pipeline";
-import { firmaValida } from "./webhook/signature";
-import { parsearPayload } from "./webhook/parse";
+import type { Tenant } from "./tenants/schema.js";
+import type { Store } from "./db/store.js";
+import type { Llm } from "./agent/run.js";
+import { procesarEntrante, Limitador, type Canal } from "./core/pipeline.js";
+import { firmaValida } from "./webhook/signature.js";
+import { parsearPayload } from "./webhook/parse.js";
 
 export interface AppDeps {
   store: Store;

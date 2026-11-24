@@ -1,10 +1,10 @@
 import { handle } from "hono/vercel";
 import { waitUntil } from "@vercel/functions";
-import { crearApp } from "../src/app";
-import { crearStore } from "../src/db";
-import { llmReal } from "../src/agent/run";
-import { cargarTodas } from "../src/tenants/load";
-import { canalWhatsApp } from "../src/whatsapp/client";
+import { crearApp } from "../src/app.js";
+import { crearStore } from "../src/db/index.js";
+import { llmReal } from "../src/agent/run.js";
+import { cargarTodas } from "../src/tenants/load.js";
+import { canalWhatsApp } from "../src/whatsapp/client.js";
 
 // Entrada de Vercel (runtime Node). Dependencias construidas una sola vez.
 // Mismo cableado que src/server.ts, pero el webhook responde 200 y el

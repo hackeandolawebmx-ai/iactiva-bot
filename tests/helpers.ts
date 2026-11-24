@@ -1,9 +1,9 @@
 import type Anthropic from "@anthropic-ai/sdk";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { validarFicha } from "../src/tenants/load";
-import type { Canal } from "../src/core/pipeline";
-import type { Llm } from "../src/agent/run";
+import { validarFicha } from "../src/tenants/load.js";
+import type { Canal } from "../src/core/pipeline.js";
+import type { Llm } from "../src/agent/run.js";
 
 export function fichaDePrueba(cambios: Record<string, unknown> = {}) {
   const raw = JSON.parse(readFileSync(join(process.cwd(), "tests", "fixtures", "consultorio.json"), "utf8"));

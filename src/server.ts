@@ -1,9 +1,9 @@
 import { serve } from "@hono/node-server";
-import { crearApp } from "./app";
-import { crearStore } from "./db";
-import { llmReal } from "./agent/run";
-import { cargarTodas } from "./tenants/load";
-import { canalWhatsApp } from "./whatsapp/client";
+import { crearApp } from "./app.js";
+import { crearStore } from "./db/index.js";
+import { llmReal } from "./agent/run.js";
+import { cargarTodas } from "./tenants/load.js";
+import { canalWhatsApp } from "./whatsapp/client.js";
 
 // Servidor local para desarrollo (pnpm dev). En Vercel se usa api/index.ts.
 const app = crearApp({

@@ -1,7 +1,7 @@
 import { readFileSync, readdirSync, existsSync } from "node:fs";
 import { join } from "node:path";
-import { TenantSchema, type Tenant } from "./schema";
-import { getModulo, nombresDeModulos } from "../modules";
+import { TenantSchema, type Tenant } from "./schema.js";
+import { getModulo, nombresDeModulos } from "../modules/index.js";
 
 export const TENANTS_DIR = join(process.cwd(), "tenants");
 

@@ -1,5 +1,5 @@
-import type { Tenant } from "../tenants/schema";
-import type { Contacto, Store } from "../db/store";
+import type { Tenant } from "../tenants/schema.js";
+import type { Contacto, Store } from "../db/store.js";
 
 export interface ToolContext {
   tenant: Tenant;

@@ -1,6 +1,6 @@
-import type { Tenant } from "../tenants/schema";
-import type { Store } from "../db/store";
-import { responder, resumirSiToca, type Llm, type RespuestaAgente } from "../agent/run";
+import type { Tenant } from "../tenants/schema.js";
+import type { Store } from "../db/store.js";
+import { responder, resumirSiToca, type Llm, type RespuestaAgente } from "../agent/run.js";
 
 export interface Entrante {
   id: string;

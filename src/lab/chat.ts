@@ -1,10 +1,10 @@
 import { createInterface } from "node:readline/promises";
 import { stdin, stdout } from "node:process";
-import { cargarFicha } from "../tenants/load";
-import { MemoryStore } from "../db/memory";
-import { SupabaseStore } from "../db/supabase";
-import { llmReal } from "../agent/run";
-import { procesarEntrante, type Canal } from "../core/pipeline";
+import { cargarFicha } from "../tenants/load.js";
+import { MemoryStore } from "../db/memory.js";
+import { SupabaseStore } from "../db/supabase.js";
+import { llmReal } from "../agent/run.js";
+import { procesarEntrante, type Canal } from "../core/pipeline.js";
 
 const slug = process.argv[2];
 if (!slug) {
