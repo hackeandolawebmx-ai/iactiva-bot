@@ -1,4 +1,4 @@
-import { handle } from "hono/vercel";
+import { getRequestListener } from "@hono/node-server";
 import { waitUntil } from "@vercel/functions";
 import { crearApp } from "../src/app.js";
 import { crearStore } from "../src/db/index.js";
@@ -19,8 +19,6 @@ export const app = crearApp({
   programar: (p) => waitUntil(p),
 });
 
-const handler = handle(app);
-
-export const GET = handler;
-export const POST = handler;
-export default handler;
+// Runtime Node de Vercel: la firma es (req, res). getRequestListener es el
+// adaptador de @hono/node-server (en v2 no existe el subpath /vercel).
+export default getRequestListener(app.fetch);
