@@ -133,17 +133,20 @@ export async function procesarEntrante(deps: Deps, tenant: Tenant, m: Entrante):
     return null;
   }
 
-  // Aviso informativo: se manda una vez por contacto y no bloquea la conversacion.
+  // Aviso informativo: va una vez por contacto al final de la primera respuesta, en el mismo mensaje.
   // Se reutiliza `consentimiento` como marca de "ya fue informado".
-  if (!tenant.privacidad.pide_consentimiento && tenant.privacidad.avisar_al_inicio && !contacto.consentimiento) {
-    await store.actualizarContacto(contacto.id, { consentimiento: true });
-    await decir(tenant.privacidad.aviso);
-  }
+  const informar =
+    !tenant.privacidad.pide_consentimiento && tenant.privacidad.avisar_al_inicio && !contacto.consentimiento;
+  const conAviso = (texto: string) => (informar ? `${texto}\n\n${tenant.privacidad.aviso}` : texto);
+  const marcarInformado = async () => {
+    if (informar) await store.actualizarContacto(contacto.id, { consentimiento: true });
+  };
 
   if (m.tipo === "imagen" || m.tipo === "audio" || m.tipo === "otro") {
     // Gancho: aqui se procesaran medios mas adelante (m.mediaId).
     await store.logEvento("medio_recibido", { tipo: m.tipo, mediaId: m.mediaId });
-    await decir("Por ahora solo puedo leer mensajes de texto. Me escribes lo que necesitas?");
+    await decir(conAviso("Por ahora solo puedo leer mensajes de texto. Me escribes lo que necesitas?"));
+    await marcarInformado();
     return null;
   }
 
@@ -175,8 +178,11 @@ export async function procesarEntrante(deps: Deps, tenant: Tenant, m: Entrante):
     },
   });
   const texto = r.texto || "Perdona, no pude responder eso. Te paso con una persona del equipo.";
-  if (r.botones?.length && canal.enviarBotones) await canal.enviarBotones(m.de, texto, r.botones);
-  else await canal.enviarTexto(m.de, texto);
+  const salida = conAviso(texto);
+  if (r.botones?.length && canal.enviarBotones) await canal.enviarBotones(m.de, salida, r.botones);
+  else await canal.enviarTexto(m.de, salida);
+  await marcarInformado();
+  // En el historial se guarda sin el aviso, para que el modelo no lo repita.
   await store.addMensaje({
     conversacion_id: conv.id,
     rol: "bot",

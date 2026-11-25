@@ -64,6 +64,8 @@ function historialAMensajes(hist: Mensaje[]): Anthropic.MessageParam[] {
   }
   // La API exige que el primer mensaje sea del usuario.
   while (out[0] && out[0].role !== "user") out.shift();
+  // Y que termine con el: el modelo rechaza una conversacion que acaba en respuesta del asistente.
+  while (out.length && out[out.length - 1]!.role !== "user") out.pop();
   return out;
 }
 
