@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import type { Cita, Contacto, Conversacion, Mensaje, NuevaCita, NuevoMensaje, Store } from "./store.js";
+import type { Cita, Contacto, Conversacion, Lead, Mensaje, NuevaCita, NuevoLead, NuevoMensaje, Store } from "./store.js";
 
 export class MemoryStore implements Store {
   private vistos = new Set<string>();
@@ -71,6 +71,46 @@ export class MemoryStore implements Store {
 
   async logEvento(tipo: string, payload: unknown) {
     this.eventos.push({ tipo, payload });
+  }
+
+  leads: Lead[] = [];
+
+  async getContacto(id: string) {
+    return [...this.contactos.values()].find((x) => x.id === id) ?? null;
+  }
+
+  async crearLead(l: NuevoLead) {
+    if (await this.getLead(l.tenant, l.contacto_id)) return null;
+    const lead: Lead = { ...l, id: randomUUID(), estado: "nuevo", contactado: null, seguimiento_enviado: null, creado: new Date() };
+    this.leads.push(lead);
+    return { ...lead };
+  }
+
+  async getLead(tenant: string, contactoId: string) {
+    const l = this.leads.find((x) => x.tenant === tenant && x.contacto_id === contactoId);
+    return l ? { ...l } : null;
+  }
+
+  async actualizarLead(id: string, cambios: Partial<Lead>) {
+    const l = this.leads.find((x) => x.id === id);
+    if (l) Object.assign(l, cambios);
+  }
+
+  async leadsContactadosDesde(tenant: string, desde: Date) {
+    return this.leads.filter((l) => l.tenant === tenant && l.contactado && l.contactado >= desde).length;
+  }
+
+  async leadsSinRespuesta(tenant: string, antesDe: Date) {
+    return this.leads.filter(
+      (l) => l.tenant === tenant && l.estado === "contactado" && !l.seguimiento_enviado && l.contactado && l.contactado <= antesDe,
+    );
+  }
+
+  async reclamarSeguimiento(id: string, cuando: Date) {
+    const l = this.leads.find((x) => x.id === id);
+    if (!l || l.seguimiento_enviado) return false;
+    l.seguimiento_enviado = cuando;
+    return true;
   }
 
   private ocupado(tenant: string, inicio: Date, fin: Date, excepto?: string) {

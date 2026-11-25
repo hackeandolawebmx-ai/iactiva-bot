@@ -1,5 +1,5 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
-import type { Cita, Contacto, Conversacion, Mensaje, NuevaCita, NuevoMensaje, Store } from "./store.js";
+import type { Cita, Contacto, Conversacion, Lead, Mensaje, NuevaCita, NuevoLead, NuevoMensaje, Store } from "./store.js";
 
 const UNICO = "23505"; // unique_violation
 const EMPALME = "23P01"; // exclusion_violation (citas_sin_empalme)
@@ -13,6 +13,13 @@ const aConversacion = (f: Fila): Conversacion => ({
 });
 const aMensaje = (f: Fila): Mensaje => ({ ...f, creado: new Date(f.creado) });
 const aCita = (f: Fila): Cita => ({ ...f, inicio: new Date(f.inicio), fin: new Date(f.fin) });
+
+const aLead = (f: Fila): Lead => ({
+  ...f,
+  contactado: f.contactado ? new Date(f.contactado) : null,
+  seguimiento_enviado: f.seguimiento_enviado ? new Date(f.seguimiento_enviado) : null,
+  creado: new Date(f.creado),
+});
 
 function ok<T>(r: { data: T; error: { message: string; code?: string } | null }, que: string): T {
   if (r.error) throw new Error(`Supabase (${que}): ${r.error.message}`);
@@ -93,6 +100,65 @@ export class SupabaseStore implements Store {
     // Un fallo al registrar no debe tumbar el flujo del mensaje.
     const { error } = await this.db.from("eventos_webhook").insert({ tipo, payload: payload ?? null });
     if (error) console.error("No se pudo registrar el evento", tipo, error.message);
+  }
+
+  async getContacto(id: string) {
+    return ok(await this.db.from("contactos").select("*").eq("id", id).maybeSingle(), "contacto") as Contacto | null;
+  }
+
+  async crearLead(l: NuevoLead) {
+    const r = await this.db.from("leads").insert(l).select().single();
+    if (r.error?.code === UNICO) return null;
+    return aLead(ok(r, "lead"));
+  }
+
+  async getLead(tenant: string, contactoId: string) {
+    const f = ok(
+      await this.db.from("leads").select("*").eq("tenant", tenant).eq("contacto_id", contactoId).maybeSingle(),
+      "lead",
+    );
+    return f ? aLead(f) : null;
+  }
+
+  async actualizarLead(id: string, cambios: Partial<Lead>) {
+    ok(await this.db.from("leads").update(cambios).eq("id", id).select(), "lead");
+  }
+
+  async leadsContactadosDesde(tenant: string, desde: Date) {
+    const r = await this.db
+      .from("leads")
+      .select("id", { count: "exact", head: true })
+      .eq("tenant", tenant)
+      .gte("contactado", desde.toISOString());
+    ok(r, "leads");
+    return r.count ?? 0;
+  }
+
+  async leadsSinRespuesta(tenant: string, antesDe: Date) {
+    const filas = ok(
+      await this.db
+        .from("leads")
+        .select("*")
+        .eq("tenant", tenant)
+        .eq("estado", "contactado")
+        .is("seguimiento_enviado", null)
+        .lte("contactado", antesDe.toISOString()),
+      "leads",
+    ) as Fila[];
+    return filas.map(aLead);
+  }
+
+  async reclamarSeguimiento(id: string, cuando: Date) {
+    const filas = ok(
+      await this.db
+        .from("leads")
+        .update({ seguimiento_enviado: cuando.toISOString() })
+        .eq("id", id)
+        .is("seguimiento_enviado", null)
+        .select("id"),
+      "lead",
+    ) as Fila[];
+    return filas.length === 1;
   }
 
   async crearCita(c: NuevaCita) {

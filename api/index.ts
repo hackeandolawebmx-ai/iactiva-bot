@@ -16,6 +16,8 @@ export const app = crearApp({
   canalPara: (t) => canalWhatsApp(t.whatsapp.phone_number_id),
   appSecret: process.env.META_APP_SECRET ?? "",
   verifyToken: process.env.META_VERIFY_TOKEN ?? "",
+  leadSecret: process.env.LEAD_SECRET,
+  cronSecret: process.env.CRON_SECRET,
   programar: (p) => waitUntil(p),
 });
 

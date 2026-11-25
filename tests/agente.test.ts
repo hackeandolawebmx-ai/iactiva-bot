@@ -1,3 +1,4 @@
+import { telefonoCanonico } from "../src/leads/telefono.js";
 import type Anthropic from "@anthropic-ai/sdk";
 import { describe, expect, it } from "vitest";
 import { MemoryStore } from "../src/db/memory.js";
@@ -109,7 +110,7 @@ describe("escalamiento", () => {
     await decir("quiero hablar con alguien");
     const aviso = enviados.find((e) => e.a === RESPONSABLE);
     expect(aviso?.texto).toContain("Quiere una factura");
-    expect(aviso?.texto).toContain(CLIENTE);
+    expect(aviso?.texto).toContain(telefonoCanonico(CLIENTE));
     expect(enviados.at(-1)).toMatchObject({ a: CLIENTE, texto: "Una persona del consultorio te contestara por aqui." });
 
     const antes = llamadas.length;

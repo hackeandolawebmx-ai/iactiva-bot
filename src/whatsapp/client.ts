@@ -38,6 +38,27 @@ export function canalWhatsApp(phoneNumberId: string, token = process.env.META_SY
         },
         token,
       ),
+    enviarPlantilla: (a, nombre, parametros) =>
+      graph(
+        `${phoneNumberId}/messages`,
+        {
+          messaging_product: "whatsapp",
+          to: a,
+          type: "template",
+          template: {
+            name: nombre,
+            language: { code: "es_MX" },
+            components: [
+              {
+                type: "body",
+                // Meta rechaza saltos de linea, tabuladores y espacios repetidos en las variables.
+                parameters: parametros.map((p) => ({ type: "text", text: p.replace(/\s+/g, " ").trim().slice(0, 600) || "-" })),
+              },
+            ],
+          },
+        },
+        token,
+      ),
     enviarTexto: (a, texto) =>
       graph(
         `${phoneNumberId}/messages`,

@@ -1,5 +1,7 @@
 import type { Tenant } from "../tenants/schema.js";
 import type { Store } from "../db/store.js";
+import { telefonoCanonico } from "../leads/telefono.js";
+import { PLANTILLAS } from "../leads/leads.js";
 import { responder, resumirSiToca, type Llm, type RespuestaAgente } from "../agent/run.js";
 
 export interface Entrante {
@@ -17,6 +19,8 @@ export interface Canal {
   marcarLeido?(mensajeId: string): Promise<void>;
   escribiendo?(mensajeId: string): Promise<void>;
   enviarTexto(a: string, texto: string): Promise<void>;
+  /** Plantilla aprobada por Meta: unica forma de escribir fuera de la ventana de 24 h. */
+  enviarPlantilla?(a: string, nombre: string, parametros: string[]): Promise<void>;
   /** Texto con botones de respuesta rapida. Si el canal no lo soporta se manda como texto. */
   enviarBotones?(a: string, texto: string, botones: string[]): Promise<void>;
 }
@@ -51,7 +55,6 @@ export class Limitador {
 const ACEPTA = /^\s*(acepto|si acepto|de acuerdo|ok acepto)\s*[.!]?\s*$/i;
 const BAJA = /^\s*(baja|stop)\s*[.!]?\s*$/i;
 const REACTIVAR = /^\s*reactivar\s+\+?(\d{8,15})\s*$/i;
-const soloDigitos = (s: string) => s.replace(/\D/g, "");
 
 export function textoDe(m: Entrante): string {
   if (m.tipo === "ubicacion" && m.ubicacion) {
@@ -71,8 +74,8 @@ export async function procesarEntrante(deps: Deps, tenant: Tenant, m: Entrante):
 
   // El responsable reactiva al bot para un cliente escribiendo: REACTIVAR <telefono>
   const orden = REACTIVAR.exec(m.texto ?? "");
-  if (orden && soloDigitos(m.de) === soloDigitos(tenant.escalamiento.numero)) {
-    const cliente = await store.upsertContacto(tenant.slug, orden[1]!);
+  if (orden && telefonoCanonico(m.de) === telefonoCanonico(tenant.escalamiento.numero)) {
+    const cliente = await store.upsertContacto(tenant.slug, telefonoCanonico(orden[1]!));
     const c = await store.getConversacion(tenant.slug, cliente.id);
     await store.actualizarConversacion(c.id, { pausada: false });
     await store.logEvento("bot_reactivado", { tenant: tenant.slug, contacto: cliente.id });
@@ -80,9 +83,19 @@ export async function procesarEntrante(deps: Deps, tenant: Tenant, m: Entrante):
     return null;
   }
 
-  const contacto = await store.upsertContacto(tenant.slug, m.de, m.nombre);
+  const contacto = await store.upsertContacto(tenant.slug, telefonoCanonico(m.de), m.nombre);
   const conv = await store.getConversacion(tenant.slug, contacto.id);
   await store.actualizarConversacion(conv.id, { ultimo_entrante: new Date() });
+
+  // El seguimiento de leads es accesorio: si falla, el bot sigue contestando.
+  try {
+    const lead = await store.getLead(tenant.slug, contacto.id);
+    if (lead && (lead.estado === "nuevo" || lead.estado === "contactado")) {
+      await store.actualizarLead(lead.id, { estado: "en_conversacion" });
+    }
+  } catch (e) {
+    await store.logEvento("error_lead_estado", String(e));
+  }
 
   const entrante = textoDe(m) || `[${m.tipo}]`;
   await store.addMensaje({ conversacion_id: conv.id, rol: "cliente", contenido: entrante });
@@ -144,7 +157,22 @@ export async function procesarEntrante(deps: Deps, tenant: Tenant, m: Entrante):
     conversacionId: conv.id,
     resumen: (await store.actualizarConversacion(conv.id, {})).resumen,
     ahora: deps.ahora?.(),
-    notificarResponsable: (aviso) => canal.enviarTexto(tenant.escalamiento.numero, aviso),
+    notificarResponsable: async (aviso) => {
+      // El texto libre no llega si el responsable no ha escrito en 24 h: primero la plantilla.
+      if (canal.enviarPlantilla) {
+        try {
+          await canal.enviarPlantilla(tenant.escalamiento.numero, PLANTILLAS.escalamiento, [
+            contacto.nombre ?? "sin nombre",
+            contacto.telefono,
+            aviso.split("\n").find((l) => l.startsWith("Resumen:"))?.slice(8).trim() || aviso,
+          ]);
+          return;
+        } catch (e) {
+          await store.logEvento("error_plantilla_escalamiento", String(e));
+        }
+      }
+      await canal.enviarTexto(tenant.escalamiento.numero, aviso);
+    },
   });
   const texto = r.texto || "Perdona, no pude responder eso. Te paso con una persona del equipo.";
   if (r.botones?.length && canal.enviarBotones) await canal.enviarBotones(m.de, texto, r.botones);

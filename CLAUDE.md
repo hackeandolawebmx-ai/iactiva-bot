@@ -21,6 +21,10 @@ Contestar a quien escribe al numero de iActiva, calificar (negocio, giro, dolor,
 - Ficha unica: `tenants/iactiva.json` (phone_number_id 1373207305886569, waba_id 1123855237083232).
 - Numero registrado en la Cloud API; la app de WhatsApp Business ya no opera con el.
 
+## Leads de la web
+- `POST /leads` (Bearer LEAD_SECRET) guarda el lead (tabla `leads`, migracion 0003), avisa a Daniel y manda la bienvenida. `GET /cron/seguimiento` (diario 17:00 UTC, Bearer CRON_SECRET) manda un solo seguimiento.
+- Plantillas es_MX: lead_bienvenida, lead_seguimiento, lead_aviso, lead_escalamiento. Logica en src/leads/.
+
 ## Pendiente
 - Validar la ficha con `pnpm test`.
 - Daniel: llaves (ANTHROPIC_API_KEY, META_APP_SECRET, META_VERIFY_TOKEN, META_SYSTEM_USER_TOKEN) en Vercel; crear proyecto Vercel, CNAME bot.iactiva.mx, callback del webhook en Meta, publicar app, verificacion de negocio.

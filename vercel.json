@@ -1,5 +1,6 @@
 {
   "rewrites": [{ "source": "/(.*)", "destination": "/api" }],
+  "crons": [{ "path": "/cron/seguimiento", "schedule": "0 17 * * *" }],
   "functions": {
     "api/index.ts": {
       "includeFiles": "tenants/**"

@@ -17,6 +17,12 @@ const tools: ToolDef[] = [
       const motivo = String(input.motivo ?? "").slice(0, 200);
       const resumen = String(input.resumen ?? "").slice(0, 600);
       await ctx.store.actualizarConversacion(ctx.conversacionId, { pausada: true });
+      try {
+        const lead = await ctx.store.getLead(ctx.tenant.slug, ctx.contacto.id);
+        if (lead) await ctx.store.actualizarLead(lead.id, { estado: "escalado" });
+      } catch (e) {
+        await ctx.store.logEvento("error_lead_estado", String(e));
+      }
       await ctx.store.logEvento("escalamiento", { tenant: ctx.tenant.slug, contacto: ctx.contacto.id, motivo });
       const aviso =
         `${ctx.tenant.nombre}: un cliente necesita atencion.\n` +
@@ -29,7 +35,7 @@ const tools: ToolDef[] = [
         await ctx.store.logEvento("error_aviso_responsable", String(e));
         return "La conversacion quedo en pausa para atencion humana, pero el aviso al responsable fallo. Dile al cliente que alguien del negocio le contestara lo antes posible.";
       }
-      return "Listo: se aviso al responsable y el bot quedo en pausa. Despidete diciendo que una persona del negocio le contestara por este mismo chat. No prometas tiempos.";
+      return "Listo: se aviso al responsable y el bot quedo en pausa. Despidete diciendo que una persona del equipo se pondra en contacto. No prometas tiempos.";
     },
   },
 ];

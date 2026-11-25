@@ -44,6 +44,26 @@ export interface Cita {
 
 export type NuevaCita = Omit<Cita, "id" | "estado">;
 
+export type EstadoLead =
+  | "nuevo" | "contactado" | "en_conversacion" | "escalado" | "llamada" | "propuesta" | "cerrado" | "descartado";
+
+export interface Lead {
+  id: string;
+  tenant: string;
+  contacto_id: string;
+  negocio: string;
+  nombre: string;
+  dolor: string;
+  detalle: string;
+  ref: string;
+  estado: EstadoLead;
+  contactado: Date | null;
+  seguimiento_enviado: Date | null;
+  creado: Date;
+}
+
+export type NuevoLead = Pick<Lead, "tenant" | "contacto_id" | "negocio" | "nombre" | "dolor" | "detalle" | "ref">;
+
 /** Contrato de persistencia. Implementaciones: memoria (laboratorio y pruebas) y Supabase (hito 2). */
 export interface Store {
   /** true si es la primera vez que se ve este id (idempotencia). false si es duplicado. */
@@ -58,6 +78,17 @@ export interface Store {
   addMensaje(m: NuevoMensaje): Promise<Mensaje>;
   ultimosMensajes(conversacionId: string, limite: number): Promise<Mensaje[]>;
   logEvento(tipo: string, payload: unknown): Promise<void>;
+  getContacto(id: string): Promise<Contacto | null>;
+
+  /** null = ese contacto ya tenia un lead. */
+  crearLead(l: NuevoLead): Promise<Lead | null>;
+  getLead(tenant: string, contactoId: string): Promise<Lead | null>;
+  actualizarLead(id: string, cambios: Partial<Pick<Lead, "estado" | "contactado">>): Promise<void>;
+  leadsContactadosDesde(tenant: string, desde: Date): Promise<number>;
+  /** Leads en estado contactado, sin seguimiento, contactados antes de la fecha. */
+  leadsSinRespuesta(tenant: string, antesDe: Date): Promise<Lead[]>;
+  /** true solo la primera vez que se marca el seguimiento. */
+  reclamarSeguimiento(id: string, cuando: Date): Promise<boolean>;
 
   /** Crea la cita solo si no se empalma con otra activa del mismo negocio. null = horario ocupado. */
   crearCita(c: NuevaCita): Promise<Cita | null>;
