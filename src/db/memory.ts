@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import type { Cita, Contacto, Conversacion, Lead, Mensaje, NuevaCita, NuevoLead, NuevoMensaje, Store } from "./store.js";
+import type { Cita, Contacto, Conversacion, Lead, Mensaje, NuevaCita, NuevoLead, NuevoMensaje, ResumenConversacion, Store } from "./store.js";
 
 export class MemoryStore implements Store {
   private vistos = new Set<string>();
@@ -74,6 +74,29 @@ export class MemoryStore implements Store {
   }
 
   leads: Lead[] = [];
+
+  async listarConversaciones(tenant: string, limite: number) {
+    const out: ResumenConversacion[] = [];
+    for (const c of this.conversaciones.values()) {
+      if (c.tenant !== tenant) continue;
+      const r = await this.getResumenConversacion(tenant, c.id);
+      if (r) out.push(r);
+    }
+    return out.slice(0, limite);
+  }
+
+  async getResumenConversacion(tenant: string, conversacionId: string) {
+    const c = [...this.conversaciones.values()].find((x) => x.id === conversacionId && x.tenant === tenant);
+    if (!c) return null;
+    const contacto = await this.getContacto(c.contacto_id);
+    if (!contacto) return null;
+    return {
+      conversacion: { ...c },
+      contacto: { ...contacto },
+      lead: await this.getLead(tenant, contacto.id),
+      ultimo: (await this.ultimosMensajes(c.id, 1))[0] ?? null,
+    };
+  }
 
   async getContacto(id: string) {
     return [...this.contactos.values()].find((x) => x.id === id) ?? null;

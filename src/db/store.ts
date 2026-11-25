@@ -64,6 +64,14 @@ export interface Lead {
 
 export type NuevoLead = Pick<Lead, "tenant" | "contacto_id" | "negocio" | "nombre" | "dolor" | "detalle" | "ref">;
 
+/** Una conversacion con lo necesario para pintarla en el panel. */
+export interface ResumenConversacion {
+  conversacion: Conversacion;
+  contacto: Contacto;
+  lead: Lead | null;
+  ultimo: Mensaje | null;
+}
+
 /** Contrato de persistencia. Implementaciones: memoria (laboratorio y pruebas) y Supabase (hito 2). */
 export interface Store {
   /** true si es la primera vez que se ve este id (idempotencia). false si es duplicado. */
@@ -78,6 +86,9 @@ export interface Store {
   addMensaje(m: NuevoMensaje): Promise<Mensaje>;
   ultimosMensajes(conversacionId: string, limite: number): Promise<Mensaje[]>;
   logEvento(tipo: string, payload: unknown): Promise<void>;
+  listarConversaciones(tenant: string, limite: number): Promise<ResumenConversacion[]>;
+  /** null si no existe o es de otro negocio. */
+  getResumenConversacion(tenant: string, conversacionId: string): Promise<ResumenConversacion | null>;
   getContacto(id: string): Promise<Contacto | null>;
 
   /** null = ese contacto ya tenia un lead. */

@@ -1,5 +1,5 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
-import type { Cita, Contacto, Conversacion, Lead, Mensaje, NuevaCita, NuevoLead, NuevoMensaje, Store } from "./store.js";
+import type { Cita, Contacto, Conversacion, Lead, Mensaje, NuevaCita, NuevoLead, NuevoMensaje, ResumenConversacion, Store } from "./store.js";
 
 const UNICO = "23505"; // unique_violation
 const EMPALME = "23P01"; // exclusion_violation (citas_sin_empalme)
@@ -20,6 +20,19 @@ const aLead = (f: Fila): Lead => ({
   seguimiento_enviado: f.seguimiento_enviado ? new Date(f.seguimiento_enviado) : null,
   creado: new Date(f.creado),
 });
+
+/** Fila de conversaciones con contacto, lead y ultimo mensaje anidados. */
+const aResumen = ({ contactos, mensajes, ...conv }: Fila): ResumenConversacion => {
+  const { leads, ...contacto } = contactos;
+  const lead = Array.isArray(leads) ? leads[0] : leads;
+  return {
+    conversacion: aConversacion(conv),
+    contacto,
+    lead: lead ? aLead(lead) : null,
+    ultimo: mensajes?.[0] ? aMensaje(mensajes[0]) : null,
+  };
+};
+const CON_RESUMEN = "*, contactos!inner(*, leads(*)), mensajes(*)";
 
 function ok<T>(r: { data: T; error: { message: string; code?: string } | null }, que: string): T {
   if (r.error) throw new Error(`Supabase (${que}): ${r.error.message}`);
@@ -100,6 +113,37 @@ export class SupabaseStore implements Store {
     // Un fallo al registrar no debe tumbar el flujo del mensaje.
     const { error } = await this.db.from("eventos_webhook").insert({ tipo, payload: payload ?? null });
     if (error) console.error("No se pudo registrar el evento", tipo, error.message);
+  }
+
+  async listarConversaciones(tenant: string, limite: number) {
+    const filas = ok(
+      await this.db
+        .from("conversaciones")
+        .select(CON_RESUMEN)
+        .eq("tenant", tenant)
+        // Sin respuesta todavia (null) primero: son los leads recien llegados.
+        .order("ultimo_entrante", { ascending: false, nullsFirst: true })
+        .order("creado", { referencedTable: "mensajes", ascending: false })
+        .limit(1, { referencedTable: "mensajes" })
+        .limit(limite),
+      "panel",
+    ) as Fila[];
+    return filas.map(aResumen);
+  }
+
+  async getResumenConversacion(tenant: string, conversacionId: string) {
+    const f = ok(
+      await this.db
+        .from("conversaciones")
+        .select(CON_RESUMEN)
+        .eq("tenant", tenant)
+        .eq("id", conversacionId)
+        .order("creado", { referencedTable: "mensajes", ascending: false })
+        .limit(1, { referencedTable: "mensajes" })
+        .maybeSingle(),
+      "panel",
+    );
+    return f ? aResumen(f) : null;
   }
 
   async getContacto(id: string) {

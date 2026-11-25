@@ -25,6 +25,9 @@ Contestar a quien escribe al numero de iActiva, calificar (negocio, giro, dolor,
 - `POST /leads` (Bearer LEAD_SECRET) guarda el lead (tabla `leads`, migracion 0003), avisa a Daniel y manda la bienvenida. `GET /cron/seguimiento` (diario 17:00 UTC, Bearer CRON_SECRET) manda un solo seguimiento.
 - Plantillas es_MX: lead_bienvenida, lead_seguimiento, lead_aviso, lead_escalamiento. Logica en src/leads/.
 
+## Panel
+- `https://bot.iactiva.mx/admin` (src/admin/): solo Daniel, contraseña en ADMIN_KEY (min. 12). Ver chats y leads, responder dentro de 24 h (pausa a Chip), pausar/reactivar, cambiar estado del lead, resumen por origen.
+
 ## Pendiente
 - Validar la ficha con `pnpm test`.
 - Daniel: llaves (ANTHROPIC_API_KEY, META_APP_SECRET, META_VERIFY_TOKEN, META_SYSTEM_USER_TOKEN) en Vercel; crear proyecto Vercel, CNAME bot.iactiva.mx, callback del webhook en Meta, publicar app, verificacion de negocio.

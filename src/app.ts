@@ -1,5 +1,6 @@
 import { createHash, timingSafeEqual } from "node:crypto";
 import { Hono } from "hono";
+import { crearPanel } from "./admin/panel.js";
 import { LeadSchema, registrarLead, mandarSeguimientos } from "./leads/leads.js";
 import type { Tenant } from "./tenants/schema.js";
 import type { Store } from "./db/store.js";
@@ -19,6 +20,8 @@ export interface AppDeps {
   leadSecret?: string;
   /** Vercel Cron lo manda como Bearer en GET /cron/seguimiento. */
   cronSecret?: string;
+  /** Contraseña del panel en /admin. */
+  adminKey?: string;
   /** En Vercel: waitUntil. En pruebas: un colector de promesas. */
   programar: (p: Promise<unknown>) => void;
 }
@@ -59,6 +62,12 @@ export function crearApp(deps: AppDeps) {
     return timingSafeEqual(h(cabecera ?? ""), h(`Bearer ${secreto}`));
   };
   const negocioDeLeads = () => deps.tenants.find((t) => t.slug === "iactiva") ?? deps.tenants[0]!;
+
+  app.get("/admin/", (c) => c.redirect("/admin", 301));
+  app.route(
+    "/admin",
+    crearPanel({ store: deps.store, tenant: negocioDeLeads, canalPara: deps.canalPara, adminKey: deps.adminKey }),
+  );
 
   app.post("/leads", async (c) => {
     if (!deps.leadSecret) return c.text("sin configurar", 503);

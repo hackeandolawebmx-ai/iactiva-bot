@@ -18,6 +18,7 @@ export const app = crearApp({
   verifyToken: process.env.META_VERIFY_TOKEN ?? "",
   leadSecret: process.env.LEAD_SECRET,
   cronSecret: process.env.CRON_SECRET,
+  adminKey: process.env.ADMIN_KEY,
   programar: (p) => waitUntil(p),
 });
 
