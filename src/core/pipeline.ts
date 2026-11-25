@@ -120,6 +120,13 @@ export async function procesarEntrante(deps: Deps, tenant: Tenant, m: Entrante):
     return null;
   }
 
+  // Aviso informativo: se manda una vez por contacto y no bloquea la conversacion.
+  // Se reutiliza `consentimiento` como marca de "ya fue informado".
+  if (!tenant.privacidad.pide_consentimiento && tenant.privacidad.avisar_al_inicio && !contacto.consentimiento) {
+    await store.actualizarContacto(contacto.id, { consentimiento: true });
+    await decir(tenant.privacidad.aviso);
+  }
+
   if (m.tipo === "imagen" || m.tipo === "audio" || m.tipo === "otro") {
     // Gancho: aqui se procesaran medios mas adelante (m.mediaId).
     await store.logEvento("medio_recibido", { tipo: m.tipo, mediaId: m.mediaId });

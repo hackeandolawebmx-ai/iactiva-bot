@@ -51,6 +51,7 @@
   "modelo": { "nombre": "claude-haiku-5-5" },
   "privacidad": {
     "aviso": "Aviso de privacidad: iactiva usa tu nombre, tu teléfono y los datos que nos compartas únicamente para atender tu mensaje y preparar una propuesta. Puedes pedir que borremos tus datos escribiendo BAJA. Aviso completo: https://iactiva.mx/aviso-de-privacidad.html",
-    "pide_consentimiento": true
+    "pide_consentimiento": false,
+    "avisar_al_inicio": true
   }
 }

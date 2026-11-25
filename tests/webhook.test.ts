@@ -94,6 +94,24 @@ describe("POST /webhook", () => {
     expect(llamadas).toHaveLength(0);
   });
 
+  it("avisar_al_inicio: manda el aviso una vez y contesta en el mismo turno, sin pedir ACEPTO", async () => {
+    const base = fichaDePrueba();
+    const { post, esperar, llamadas, enviados } = montar({
+      privacidad: { ...base.privacidad, pide_consentimiento: false, avisar_al_inicio: true },
+    });
+    await post(payloadTexto("wamid.20", "hola"));
+    await esperar();
+    expect(enviados).toHaveLength(2);
+    expect(enviados[0]?.texto).toBe(base.privacidad.aviso);
+    expect(enviados[0]?.texto).not.toMatch(/ACEPTO/);
+    expect(enviados[1]?.texto).toBe("Hola desde el bot");
+    expect(llamadas).toHaveLength(1);
+    await post(payloadTexto("wamid.21", "otra cosa"));
+    await esperar();
+    expect(enviados).toHaveLength(3); // el aviso no se repite
+    expect(enviados[2]?.texto).toBe("Hola desde el bot");
+  });
+
   it("BAJA marca opt-out y confirma sin llamar al modelo", async () => {
     const { post, esperar, llamadas, enviados } = montar();
     await post(payloadTexto("wamid.7", "BAJA"));

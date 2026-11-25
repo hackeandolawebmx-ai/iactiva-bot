@@ -62,6 +62,8 @@ export const TenantSchema = z.object({
   privacidad: z.object({
     aviso: texto,
     pide_consentimiento: z.boolean(),
+    // Sin pedir ACEPTO: manda el aviso una sola vez al primer mensaje y sigue conversando.
+    avisar_al_inicio: z.boolean().default(false),
   }),
 });
 
